@@ -7,6 +7,8 @@ fn main() {
 
     solution1("example1.txt", &cubes);
     solution1("input.txt", &cubes);
+    solution2("example2.txt");
+    solution2("input.txt");
 }
 
 struct Game {
@@ -67,7 +69,7 @@ impl Game {
 }
 
 fn solution1(filename: &str,  max_cubes: &HashMap<String, u8>) {
-    println!("Calibrating file {}", filename);
+    println!("Solving for file {}", filename);
 
     let mut result = 0;
 
@@ -82,4 +84,25 @@ fn solution1(filename: &str,  max_cubes: &HashMap<String, u8>) {
     }
 
     println!("Solution 1: {}", result);
+}
+
+fn solution2(filename: &str) {
+    println!("Solving for file {}", filename);
+
+    let mut result = 0;
+
+    for line in fs::read_to_string(filename).expect("Could not read file").lines() {
+        let game = Game::from_line(line);
+
+        // Check is this game is valid
+        let mut score = 1;
+
+        for count in game.cubes.values() {
+            score *= *count as u32;
+        }
+
+        result += score;
+    }
+
+    println!("Solution 2: {}", result);
 }
