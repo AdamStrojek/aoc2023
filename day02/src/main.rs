@@ -3,15 +3,16 @@ use std::collections::HashMap;
 use std::fs;
 
 fn main() {
-    solution1("example1.txt", &HashMap::from([("red", 12u8), ("green", 13u8), ("blue", 14u8)]));;
+    let cubes = HashMap::from([("red", 12u8), ("green", 13u8), ("blue", 14u8)]);
+
+    solution1("example1.txt", &cubes);
+    solution1("input.txt", &cubes);
 }
-
-
 
 fn solution1(filename: &str, max_cubes: &HashMap<&str, u8>) {
     println!("Calibrating file {}", filename);
 
-    let result = 0;
+    let mut result = 0;
 
     for line in fs::read_to_string(filename).expect("Could not read file").lines() {
         // "Game 1: ....."
@@ -55,8 +56,10 @@ fn solution1(filename: &str, max_cubes: &HashMap<&str, u8>) {
         }
 
         println!("{} is valid {}", game, valid_game);
-        // dbg!(&cubes);
+        if valid_game {
+            result += game as u32;
+        }
     }
 
-    println!("Done!");
+    println!("Solution 1: {}", result);
 }
