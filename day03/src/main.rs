@@ -62,6 +62,10 @@ fn solution2(filename: &str) {
     parse_data(filename, &mut numbers, &mut symbols_pos);
 
     for (row, col, ch) in symbols_pos.iter() {
+        if *ch != '*' {
+            // Can safely skip, we are interested only in gear ratios
+            continue;
+        }
         // Collect all adjacent numbers
         let mut nearby: Vec<&Number> = Vec::new();
         for num in numbers.iter() {
@@ -71,7 +75,7 @@ fn solution2(filename: &str) {
         }
 
         // Check what symbol was nearby
-        if *ch == '*' && nearby.len() == 2 {
+        if nearby.len() == 2 {
             // If was * and 2 items are nearby calculate gear ratio
             part_number += nearby.iter().fold(1, |acc, x| acc * x.number);
         }
