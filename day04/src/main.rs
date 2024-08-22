@@ -3,11 +3,26 @@ use std::collections::HashSet;
 
 
 fn main() {
-    println!("Hello, world!");
+    solution1("example1.txt");
+    
 }
 
+fn solution1(filename: &str) {
+    println!("Solving for file {}", filename);
+
+    let mut result: u32 = 0;
+
+    for line in fs::read_to_string(filename).expect("Could not read file").lines() {
+        let card = ScratchCard::parse_line(&line);
+        result += card.score() as u32;
+    }
+
+    println!("Solution 1: {}", result);
+}
+
+#[derive(Debug)]
 struct ScratchCard {
-    no: i32,
+    no: u32,
     winning: HashSet<i8>,
     yours: HashSet<i8>,
 }
@@ -19,9 +34,9 @@ impl ScratchCard {
         //       ^ Safely can skip first 5 characters
         let mut it = line[5..].chars().peekable();
 
-        let mut part: u8 = 0;
+        let mut part: u32 = 0;
 
-        let mut no: i32 = 0;
+        let mut no: u32 = 0;
         let mut winning: HashSet<i8> = HashSet::new();
         let mut yours: HashSet<i8> = HashSet::new();
 
@@ -64,14 +79,14 @@ impl ScratchCard {
         self.winning.intersection(&self.yours).count() as u32
     }
 
-    fn score(&self) -> u8 {
+    fn score(&self) -> u32 {
         let matching = self.matching();
 
         if matching > 0 {
-            return 2u32.pow(matching - 1) as u8
+            return 2u32.pow(matching - 1) as u32
         }
 
-        0u8
+        0u32
     }
 }
 
