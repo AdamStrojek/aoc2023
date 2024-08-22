@@ -31,15 +31,29 @@ impl Number {
 fn solution1(filename: &str) {
     println!("Solving for file {}", filename);
 
-    let mut part_number = 0;
     let mut numbers: Vec<Number> = Vec::new();
     let mut symbols_pos: Vec<(i32, i32)> = Vec::new();
 
+    let mut part_number = parse_data(filename, &mut numbers, &mut symbols_pos);
+
+    for num in numbers.iter() {
+        for (row, col) in symbols_pos.iter() {
+            if num.is_symbol_nearby(row, col) {
+                part_number += num.number;
+            }
+        }
+    }
+
+    println!("Solution 1: {}", part_number);
+}
+
+fn parse_data(filename: &str, numbers: &mut Vec<Number>, symbols_pos: &mut Vec<(i32, i32)>) -> i32 {
+    let mut part_number = 0;
     for (row, line) in fs::read_to_string(filename).expect("Could not read file").lines().enumerate() {
         let mut it = line.chars().enumerate().peekable();
         let mut buf = String::new();
 
-        while let Some((col, ch)) = it.next()  {
+        while let Some((col, ch)) = it.next() {
             if ch.is_ascii_digit() {
                 buf.push(ch);
 
@@ -52,20 +66,7 @@ fn solution1(filename: &str) {
             } else if ch != '.' {
                 symbols_pos.push((row as i32, col as i32));
             }
-
         }
     }
-
-    for num in numbers.iter() {
-        for (row, col) in symbols_pos.iter() {
-            if num.is_symbol_nearby(row, col) {
-                part_number += num.number;
-            }
-        }
-    }
-
-    // dbg!(&numbers);
-    // dbg!(&symbols_pos);
-
-    println!("Solution 1: {}", part_number);
+    part_number
 }
