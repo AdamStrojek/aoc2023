@@ -3,6 +3,8 @@ use std::fs;
 fn main() {
     solution1("example1.txt");
     solution1("input.txt");
+    solution2("example2.txt");
+    solution2("input.txt");
 }
 
 #[derive(Debug)]
@@ -32,12 +34,14 @@ fn solution1(filename: &str) {
     println!("Solving for file {}", filename);
 
     let mut numbers: Vec<Number> = Vec::new();
-    let mut symbols_pos: Vec<(i32, i32)> = Vec::new();
+    let mut symbols_pos: Vec<(i32, i32, char)> = Vec::new();
 
-    let mut part_number = parse_data(filename, &mut numbers, &mut symbols_pos);
+    let mut part_number: i32 = 0;
+
+    parse_data(filename, &mut numbers, &mut symbols_pos);
 
     for num in numbers.iter() {
-        for (row, col) in symbols_pos.iter() {
+        for (row, col, _) in symbols_pos.iter() {
             if num.is_symbol_nearby(row, col) {
                 part_number += num.number;
             }
@@ -47,8 +51,36 @@ fn solution1(filename: &str) {
     println!("Solution 1: {}", part_number);
 }
 
-fn parse_data(filename: &str, numbers: &mut Vec<Number>, symbols_pos: &mut Vec<(i32, i32)>) -> i32 {
-    let mut part_number = 0;
+fn solution2(filename: &str) {
+    println!("Solving for file {}", filename);
+
+    let mut numbers: Vec<Number> = Vec::new();
+    let mut symbols_pos: Vec<(i32, i32, char)> = Vec::new();
+
+    let mut part_number: i32 = 0;
+
+    parse_data(filename, &mut numbers, &mut symbols_pos);
+
+    for (row, col, ch) in symbols_pos.iter() {
+        // Collect all adjacent numbers
+        let mut nearby: Vec<&Number> = Vec::new();
+        for num in numbers.iter() {
+            if num.is_symbol_nearby(row, col) {
+                nearby.push(&num);
+            }
+        }
+
+        // Check what symbol was nearby
+        if *ch == '*' && nearby.len() == 2 {
+            // If was * and 2 items are nearby calculate gear ratio
+            part_number += nearby.iter().fold(1, |acc, x| acc * x.number);
+        }
+    }
+
+    println!("Solution 2: {}", part_number);
+}
+
+fn parse_data(filename: &str, numbers: &mut Vec<Number>, symbols_pos: &mut Vec<(i32, i32, char)>) {
     for (row, line) in fs::read_to_string(filename).expect("Could not read file").lines().enumerate() {
         let mut it = line.chars().enumerate().peekable();
         let mut buf = String::new();
@@ -64,9 +96,8 @@ fn parse_data(filename: &str, numbers: &mut Vec<Number>, symbols_pos: &mut Vec<(
                     buf.clear();
                 }
             } else if ch != '.' {
-                symbols_pos.push((row as i32, col as i32));
+                symbols_pos.push((row as i32, col as i32, ch));
             }
         }
     }
-    part_number
 }
