@@ -1,10 +1,13 @@
 use std::fs;
-use std::collections::HashSet;
+use std::collections::{HashSet, VecDeque};
 
 
 fn main() {
     solution1("example1.txt");
-    
+    solution1("input.txt");
+
+    solution2("example1.txt");
+    solution2("input.txt");
 }
 
 fn solution1(filename: &str) {
@@ -18,6 +21,31 @@ fn solution1(filename: &str) {
     }
 
     println!("Solution 1: {}", result);
+}
+
+fn solution2(filename: &str) {
+    println!("Solving for file {}", filename);
+
+    let file_content = fs::read_to_string(filename).expect("Could not read file");
+
+    let mut result: u32 = 0;
+    let mut multiplier: VecDeque<u32> = VecDeque::new();
+    multiplier.resize(file_content.lines().count(), 1);
+
+    for line in file_content.lines() {
+        let card = ScratchCard::parse_line(&line);
+        let matching = card.matching();
+        let mult = multiplier.pop_front().or(Some(1)).unwrap();
+        result += mult;
+
+        for i in 0..matching {
+            if let Some(x) = multiplier.get_mut(i as usize) {
+                *x += mult;
+            }
+        }
+    }
+
+    println!("Solution 2: {}", result);
 }
 
 #[derive(Debug)]
