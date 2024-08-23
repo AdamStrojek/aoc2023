@@ -20,6 +20,8 @@ impl MappingItem {
 }
 
 struct Mapper {
+    source: String,
+    target: String,
     mapping_items: Vec<MappingItem>,
 }
 
@@ -27,7 +29,17 @@ impl Mapper {
     fn parse_from_str(s: &str) -> Self {
         let mut items: Vec<MappingItem> = Vec::new();
 
-        for line in s.lines() {
+        let mut it = s.lines();
+
+        // seed-to-soil map:
+        //             ^ strip suffix
+        let mut title = it.next().unwrap().strip_suffix(" map:").unwrap().split("-to-");
+        let source = title.next().unwrap().to_string();
+        let target = title.next().unwrap().to_string();
+
+        //  45  77  23
+        // dst src len
+        while let Some(line) = it.next() {
             let mut parts = line.split_whitespace();
 
             items.push(MappingItem {
@@ -37,9 +49,10 @@ impl Mapper {
             });
         }
 
+        // Sort everything for branch prediction to work better.
         items.sort_by_key(|mi| mi.source);
 
-        Self { mapping_items: items }
+        Self { source, target, mapping_items: items }
     }
 
     fn map(&self, source: u32) -> u32 {
@@ -58,7 +71,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let s = "50 98 2\n52 50 48";
+        let s = "seed-to-soil map:\n50 98 2\n52 50 48";
 
         let mapper = Mapper::parse_from_str(s);
 
@@ -67,7 +80,7 @@ mod tests {
 
     #[test]
     fn test_mapping() {
-        let s = "50 98 2\n52 50 48";
+        let s = "seed-to-soil map:\n50 98 2\n52 50 48";
 
         let mapper = Mapper::parse_from_str(s);
 
