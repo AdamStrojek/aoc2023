@@ -1,20 +1,60 @@
+use std::fs;
+
 fn main() {
-    println!("Hello, world!");
+    solution1("example.txt");
+    solution1("input.txt");
+}
+
+fn solution1(filename: &str) {
+    println!("Solving for file {}", filename);
+
+    let mut locations = Vec::new();
+
+    let file_content = fs::read_to_string(filename).expect("Could not read file");
+
+    let mut it = file_content.split("\n\n");
+
+    // seeds: 79 14 55 13
+    // 012345678901234567
+    //        ^ safely can skip here
+    let seeds = it.next().unwrap().strip_prefix("seeds: ").unwrap()
+        .split_whitespace().map(|seed| seed.parse::<u64>().unwrap())
+        .collect::<Vec<u64>>();
+
+    // Parse mappings
+    let mut mappers = Vec::<Mapper>::new();
+
+    while let Some(mapping_line) = it.next() {
+        let mapper = Mapper::parse_from_str(mapping_line);
+        mappers.push(mapper);
+    }
+
+    for seed in seeds {
+        let mut value = seed;
+        for mapper in mappers.iter() {
+            value = mapper.map(value);
+        }
+
+        locations.push(value);
+    }
+
+    locations.sort();
+    println!("Solution 1: {}", locations.first().unwrap());
 }
 
 #[derive(Debug, PartialEq)]
 struct MappingItem {
-    source: u32,
-    target: u32,
-    length: u32,
+    source: u64,
+    target: u64,
+    length: u64,
 }
 
 impl MappingItem {
-    fn new(source: u32, target: u32, length: u32) -> MappingItem {
+    fn new(source: u64, target: u64, length: u64) -> MappingItem {
         MappingItem { source, target, length }
     }
 
-    fn in_range(&self, source: u32) -> bool {
+    fn in_range(&self, source: u64) -> bool {
         self.source <= source && source < self.source + self.length
     }
 }
@@ -55,7 +95,7 @@ impl Mapper {
         Self { source, target, mapping_items: items }
     }
 
-    fn map(&self, source: u32) -> u32 {
+    fn map(&self, source: u64) -> u64 {
         let mapping_item = self.mapping_items.iter().find(|mi| mi.in_range(source));
         match mapping_item {
             Some(mi) => mi.target + source - mi.source,
