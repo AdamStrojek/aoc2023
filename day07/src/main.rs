@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use std::fs;
 
 fn main() {
-    solution1("day07/example.txt");
-    solution1("day07/input.txt");
+    solution2("day07/example.txt");
+    solution2("day07/input.txt");
 }
 
-fn solution1(filename: &str) {
+fn solution2(filename: &str) {
     println!("Solving for file {}", filename);
 
     let mut hands: Vec<(Hand, u32)> = Vec::new();
@@ -25,15 +25,14 @@ fn solution1(filename: &str) {
 
     let mut total_bid = 0;
 
-    for (rank, (hand, bid)) in hands.iter().enumerate() {
+    for (rank, (_, bid)) in hands.iter().enumerate() {
         total_bid += (rank+1) as u32 * *bid;
-        println!("{:?} bid {} rank {}", hand, bid, rank);
     }
 
     println!("Total winning: {}", total_bid);
 }
 
-const CARDS_ORDER: &str = "AKQJT98765432";
+const CARDS_ORDER: &str = "AKQT98765432J";
 
 #[derive(Debug, PartialEq, PartialOrd)]
 enum HandType {
@@ -50,23 +49,29 @@ impl HandType {
     fn from_cards(cards: &str) -> HandType {
         let mut cards_count: HashMap<char, u8> = HashMap::new();
 
+        let mut jokers = 0;
+
         for card in cards.chars() {
-            cards_count.entry(card).and_modify(|n| *n += 1).or_insert(1);
+            if card == 'J' {
+                jokers += 1;
+            } else {
+                cards_count.entry(card).and_modify(|n| *n += 1).or_insert(1);
+            }
         }
 
         let mut sorted: Vec<&u8> = cards_count.values().collect();
         sorted.sort();
 
-        match sorted.pop() {
-            Some(5) => HandType::FiveOfKind,
-            Some(4) => HandType::FourOfKind,
-            Some(3) => {
+        match sorted.pop().unwrap_or(&0u8) + jokers {
+            5 => HandType::FiveOfKind,
+            4 => HandType::FourOfKind,
+            3 => {
                 match sorted.pop() {
                     Some(2) => HandType::FullHouse,
                     _ => HandType::ThreeOfKind,
                 }
             },
-            Some(2) => {
+            2 => {
                 match sorted.pop() {
                     Some(2) => HandType::TwoPair,
                     _ => HandType::OnePair,
