@@ -13,10 +13,8 @@ fn main() {
 
     let nodes = Nodes::from_string(it.next().unwrap());
 
-    let start_node = "AAA".to_string();
-
-    let result = nodes.traverse(&mut path, 0, &start_node);
-    println!("Result: {}", result.unwrap());
+    let result = nodes.traverse_loop(&mut path);
+    println!("Result: {}", result);
 }
 
 struct Nodes(HashMap<String, (String, String)>);
@@ -46,5 +44,21 @@ impl Nodes {
                 _ => self.traverse(path, count + 1, right),
             }
         }
+    }
+
+    fn traverse_loop(&self, path: &mut Cycle<Chars>) -> usize {
+        let mut current: &String = &String::from("AAA");
+        let mut result = 0;
+
+        while current != "ZZZ" {
+            let (left, right) = self.0.get(current).unwrap();
+            current = match path.next() {
+                Some('L') => left,
+                _ => right,
+            };
+            result += 1;
+        }
+
+        result
     }
 }
